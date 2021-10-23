@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import service.core.ClientApplication;
@@ -14,7 +15,10 @@ import service.core.Quotation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Implementation of the broker service that uses the Service Registry.
@@ -25,8 +29,7 @@ import java.util.*;
 @RestController
 public class LocalBrokerService{
 
-	static Random r = new Random();
-	private static Map<Integer,ClientApplication> clientApplications= new HashMap<>();
+	private static Map<String,ClientApplication> clientApplications= new HashMap<>();
 	private static ArrayList<ClientApplication> clientApplicationArrayList = new ArrayList<>();
 
 	@Value("${auldfellasurl}")
@@ -35,13 +38,12 @@ public class LocalBrokerService{
 	String dodgydrivers ;
 	@Value("${girlpowerurl}")
 	String girlpower ;
-
 	@RequestMapping(value="/application",method= RequestMethod.POST)
 	public ResponseEntity<ClientApplication> callGetQuotation(@RequestBody ClientInfo info) throws URISyntaxException {
 		ArrayList<Quotation> quotationFromServices = getQuotations(info);
 		ClientApplication clientApplication = new ClientApplication();
 		clientApplication.setClientInfo(info);
-		clientApplication.setApplicationNumber(r.nextInt());
+		clientApplication.setApplicationNumber(UUID.randomUUID().toString());
 		clientApplication.setQuotations(quotationFromServices);
 		clientApplications.put(clientApplication.getApplicationNumber(), clientApplication);
 		String path = ServletUriComponentsBuilder.fromCurrentContextPath().
@@ -80,10 +82,15 @@ public class LocalBrokerService{
 		for(String url : urls){
 			RestTemplate restTemplate = new RestTemplate();
 			HttpEntity<ClientInfo> request = new HttpEntity<>(info);
-			Quotation quotation =
-					restTemplate.postForObject(url,
-							request, Quotation.class);
-			quotations.add(quotation);
+			try {
+				Quotation quotation =
+						restTemplate.postForObject(url,
+								request, Quotation.class);
+				quotations.add(quotation);
+			}
+			catch (ResourceAccessException ex){
+				System.out.println("URL not accessible"+ex.getMessage());
+			}
 		}
 		return quotations;
 	}

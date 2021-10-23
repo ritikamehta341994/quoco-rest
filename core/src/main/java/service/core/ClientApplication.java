@@ -4,17 +4,17 @@ import java.util.ArrayList;
 
 public class ClientApplication {
 
-    private int applicationNumber;
+    private String applicationNumber;
     private ClientInfo clientInfo;
     private ArrayList<Quotation> quotations;
 
     public ClientApplication(){}
 
-    public int getApplicationNumber() {
+    public String getApplicationNumber() {
         return applicationNumber;
     }
 
-    public void setApplicationNumber(int applicationNumber) {
+    public void setApplicationNumber(String applicationNumber) {
         this.applicationNumber = applicationNumber;
     }
 

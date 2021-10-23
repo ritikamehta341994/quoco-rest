@@ -1,0 +1,7 @@
+# Project exclude paths
+/auldfellas/target/
+/broker/target/
+/client/target/
+/core/target/
+/dodgydrivers/target/
+/girlpower/target/
